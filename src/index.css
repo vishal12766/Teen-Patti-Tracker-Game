@@ -1,0 +1,130 @@
+@import "tailwindcss";
+
+/* Faster taps on phones (no double-tap zoom delay on buttons) */
+button {
+  touch-action: manipulation;
+}
+
+/* Respect "reduce motion" accessibility settings */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Our custom theme colors (from your design spec) */
+@theme {
+  --color-brand-bg: #050b14;
+  --color-brand-blue: #3b82f6;
+  --color-brand-purple: #8b5cf6;
+  --color-brand-green: #22c55e;
+  --color-brand-red: #ef4444;
+  --color-brand-amber: #f59e0b;
+
+  /* Animations (use them as classes like "animate-toast-in") */
+  --animate-toast-in: toast-in 0.3s ease-out;
+  --animate-turn-glow: turn-glow 2s ease-in-out infinite;
+  --animate-pop: pop 0.4s ease-out;
+  --animate-modal-in: modal-in 0.35s ease-out;
+
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(-12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Soft pulsing blue glow around the player whose turn it is */
+  @keyframes turn-glow {
+    0%,
+    100% {
+      box-shadow: 0 0 8px 0 rgba(59, 130, 246, 0.35);
+    }
+    50% {
+      box-shadow: 0 0 24px 4px rgba(59, 130, 246, 0.6);
+    }
+  }
+
+  /* Numbers briefly grow and brighten when they change */
+  @keyframes pop {
+    0% {
+      transform: scale(1);
+      filter: brightness(1);
+    }
+    40% {
+      transform: scale(1.18);
+      filter: brightness(1.5);
+    }
+    100% {
+      transform: scale(1);
+      filter: brightness(1);
+    }
+  }
+
+  /* Popups zoom in slightly while fading in */
+  @keyframes modal-in {
+    from {
+      opacity: 0;
+      transform: scale(0.9) translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+}
+
+/* Page-wide base styles */
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  background-color: #050b14;
+  color: #e5e7eb;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  overflow-x: hidden;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+}
+
+input,
+textarea,
+button,
+select {
+  font-family: inherit;
+  font-size: 16px;
+}
+
+@media (max-width: 380px) {
+  html {
+    font-size: 14px;
+  }
+}

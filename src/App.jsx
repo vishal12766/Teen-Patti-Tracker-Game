@@ -82,10 +82,10 @@ export default function App() {
       showToast(result.message)
       return
     }
-    if (action === 'pack') {
-      if (result.remaining === 1) {
-        const last = getCurrentPlayer(result.game)
-        showToast(`${last.name} is the last player left. Declare the winner!`, 'info')
+      if (action === 'pack') {
+      if (result.autoWinner) {
+        const winner = result.game.lastWinner
+        showToast(`${winner.name} wins ₹${winner.amount}. Everyone else packed`, 'success')
       } else {
         showToast(`${name} packed`, 'info')
       }

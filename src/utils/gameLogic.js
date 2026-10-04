@@ -450,7 +450,20 @@ export function applyAction(game, action) {
   }
 
   if (action === 'seen') return markSeen(game)
-  if (action === 'pack') return packPlayer(game)
+    if (action === 'pack') {
+    const result = packPlayer(game)
+    if (!result.ok) return result
+
+    // Only one player left: they win the pot automatically
+    if (result.remaining === 1) {
+      const last = getActivePlayers(result.game.players)[0]
+      const won = declareWinner(result.game, last.id)
+      if (won.ok) {
+        return { ok: true, game: won.game, remaining: 1, autoWinner: true }
+      }
+    }
+    return result
+  }
 
   return { ok: false, message: 'Unknown action' }
 }

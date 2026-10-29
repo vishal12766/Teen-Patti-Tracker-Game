@@ -10,7 +10,7 @@ const EXAMPLE_NAMES = ['Vishal', 'Rahul', 'Aman', 'Rohit', 'Karan', 'Neha', 'Pri
 
 let nextRowId = 1
 function newRow() {
-  return { id: nextRowId++, name: '' }
+  return { id: nextRowId++, name: '', money: '0' }
 }
 
 const inputClass =
@@ -36,8 +36,8 @@ export default function SetupPage({ onStart, onJoin, showToast }) {
     setRows(rows.filter((row) => row.id !== id))
   }
 
-  function updateName(id, value) {
-    setRows(rows.map((row) => (row.id === id ? { ...row, name: value } : row)))
+    function updateRow(id, field, value) {
+    setRows(rows.map((row) => (row.id === id ? { ...row, [field]: value } : row)))
   }
 
   function handleStart() {
@@ -100,10 +100,20 @@ export default function SetupPage({ onStart, onJoin, showToast }) {
             </span>
           </div>
 
-          <div className="space-y-2.5 sm:space-y-3">
+           <div className="mb-2 hidden grid-cols-[2rem_1fr_9rem_2.5rem] gap-3 px-1 text-xs uppercase tracking-wide text-gray-500 sm:grid">
+            <span></span>
+            <span>Name</span>
+            <span>Starting balance</span>
+            <span></span>
+          </div>
+
+          <div className="space-y-3">
             {rows.map((row, index) => (
-              <div key={row.id} className="grid grid-cols-[1.75rem_1fr_2.25rem] items-center gap-2 sm:grid-cols-[2rem_1fr_2.5rem] sm:gap-3">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-brand-blue to-brand-purple text-xs font-bold text-white sm:h-8 sm:w-8 sm:text-sm">
+              <div
+                key={row.id}
+                className="grid grid-cols-[2rem_1fr_2.5rem] items-center gap-3 sm:grid-cols-[2rem_1fr_9rem_2.5rem]"
+              >
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-brand-blue to-brand-purple text-sm font-bold text-white">
                   {index + 1}
                 </div>
 
@@ -112,17 +122,32 @@ export default function SetupPage({ onStart, onJoin, showToast }) {
                   value={row.name}
                   maxLength={20}
                   placeholder={`e.g. ${EXAMPLE_NAMES[index]}`}
-                  onChange={(e) => updateName(row.id, e.target.value)}
-                  className={`${inputClass} py-2.5 sm:py-3`}
+                  onChange={(e) => updateRow(row.id, 'name', e.target.value)}
+                  className={inputClass}
                 />
 
                 <button
                   onClick={() => removePlayer(row.id)}
                   aria-label={`Remove player ${index + 1}`}
-                  className="flex h-9 w-9 items-center justify-center rounded-xl text-gray-400 transition hover:bg-brand-red/20 hover:text-brand-red active:scale-90 sm:h-10 sm:w-10"
+                  className="order-3 flex h-10 w-10 items-center justify-center rounded-xl text-gray-400 transition hover:bg-brand-red/20 hover:text-brand-red active:scale-90 sm:order-none sm:col-start-4"
                 >
                   ✕
                 </button>
+
+                {/* Starting balance (can be negative) */}
+                <div className="relative col-span-3 col-start-1 sm:col-span-1 sm:col-start-3 sm:row-start-1">
+                  <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                    ₹
+                  </span>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    value={row.money}
+                    placeholder="0"
+                    onChange={(e) => updateRow(row.id, 'money', e.target.value)}
+                    className={`${inputClass} pl-8`}
+                  />
+                </div>
               </div>
             ))}
           </div>

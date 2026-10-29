@@ -108,7 +108,7 @@ export function declareWinner(game, winnerId) {
         ...game.history,
         { round: game.round, winnerName: winner.name, pot: prize },
       ],
-      lastWinner: { name: winner.name, amount: prize }, // makes the modal appear
+      lastWinner: { id: winner.id, name: winner.name, amount: prize },// makes the modal appear
     },
   };
 }
@@ -131,6 +131,12 @@ export function collectBoot(players, boot) {
 // Resets for the next round, collects the boot, keeps every balance.
 export function startNewRound(game) {
   const collected = collectBoot(game.players, game.boot);
+  // The winner of the last round plays first (falls back to player 1 if not found)
+  const winnerIndex = game.lastWinner
+    ? game.players.findIndex(
+        (p) => p.id === game.lastWinner.id || p.name === game.lastWinner.name
+      )
+    : -1
 
   return {
     ok: true,
@@ -141,7 +147,7 @@ export function startNewRound(game) {
       pot: collected.pot,
       opening: true,
       currentChaal: getStartingChaal(game.boot),
-      currentTurn: 0,
+      currentTurn: winnerIndex >= 0 ? winnerIndex : 0,
       lastWinner: null,
       players: collected.players,
     },
@@ -351,7 +357,7 @@ export function createPlayer(name, money) {
 
 // Creates the full game state when the user presses "Start Game".
 export function createInitialGameState(setupPlayers, boot) {
-  const created = setupPlayers.map((p) => createPlayer(p.name, 0)); // everyone starts at ₹0
+  const created = setupPlayers.map((p) => createPlayer(p.name, p.money || 0)) 
   const collected = collectBoot(created, boot);
 
   return {
@@ -406,7 +412,14 @@ export function validateSetup(rows, bootInput) {
     }
     seenNames.add(key);
 
-    players.push({ name });
+    // Starting balance is optional: empty means ₹0. Negative is allowed.
+    const rawMoney = String(rows[i].money ?? '').trim()
+    const money = rawMoney === '' ? 0 : Number(rawMoney)
+    if (Number.isNaN(money) || !Number.isInteger(money)) {
+      return { ok: false, message: `${name}: starting balance must be a whole number` }
+    }
+
+    players.push({ name, money })
   }
 
   return { ok: true, players, boot };
@@ -466,4 +479,31 @@ export function applyAction(game, action) {
   }
 
   return { ok: false, message: 'Unknown action' }
+}
+
+// Adds a player in the middle of a game.
+// They sit out the current round (PACKED, no boot) and play from the next one.
+export function addPlayerToGame(game, name, moneyInput) {
+  if (game.players.length >= MAX_PLAYERS) {
+    return { ok: false, message: `Maximum ${MAX_PLAYERS} players allowed` }
+  }
+
+  const clean = String(name || '').trim()
+  if (clean === '') {
+    return { ok: false, message: 'Enter a name' }
+  }
+  if (game.players.some((p) => p.name.toLowerCase() === clean.toLowerCase())) {
+    return { ok: false, message: `Duplicate name: "${clean}"` }
+  }
+
+  const raw = String(moneyInput ?? '').trim()
+  const money = raw === '' ? 0 : Number(raw)
+  if (Number.isNaN(money) || !Number.isInteger(money)) {
+    return { ok: false, message: 'Starting balance must be a whole number' }
+  }
+
+  // Added at the END of the list, so the current turn index stays correct
+  const player = { ...createPlayer(clean, money), status: STATUS.PACKED }
+
+  return { ok: true, game: { ...game, players: [...game.players, player] } }
 }

@@ -7,6 +7,7 @@ import ConfirmModal from './components/ConfirmModal'
 import { clearGame, loadGame, saveGame } from './utils/storage'
 import { useGuest, useHost } from './utils/multiplayer'
 import {
+  addPlayerToGame,
   applyAction,
   createInitialGameState,
   declareWinner,
@@ -124,6 +125,18 @@ export default function App() {
     showToast(`Round ${result.game.round} started. Everyone paid the boot`, 'success')
   }
 
+  // Host adds a player in the middle of the game
+  function handleAddPlayer(name, money) {
+    if (!gameRef.current) return { ok: false, message: 'No game running' }
+    const result = addPlayerToGame(gameRef.current, name, money)
+    if (!result.ok) return result
+
+    gameRef.current = result.game
+    setGame(result.game)
+    showToast(`${name.trim()} added. They play from the next round`, 'success')
+    return result
+  }
+
   function handleLeaveGuest() {
     guest.leave()
     setJoining(false)
@@ -155,6 +168,7 @@ export default function App() {
         onClosePicker={() => setShowPicker(false)}
         onSelectWinner={handleSelectWinner}
         onNextRound={handleNextRound}
+        onAddPlayer={handleAddPlayer}
       />
     )
   } else if (guest.status === 'connected' && guest.game && guest.myPlayerId !== null) {

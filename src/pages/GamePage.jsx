@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import AddPlayerModal from '../components/AddPlayerModal'
 import Navbar from '../components/Navbar'
 import GameStats from '../components/GameStats'
 import PlayerList from '../components/PlayerList'
@@ -28,9 +29,11 @@ export default function GamePage({
   onClosePicker, // host only
   onSelectWinner, // host only
   onNextRound, // host only
+  onAddPlayer, // host only
 }) {
   const acting = canAct && !game.lastWinner
   const resultsRef = useRef(null)
+  const [showAdd, setShowAdd] = useState(false)
 
   // When a winner is declared, scroll down to the stats and the next-round button
   useEffect(() => {
@@ -55,6 +58,14 @@ export default function GamePage({
 
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="order-last lg:order-first lg:col-span-2">
+            {onAddPlayer && (
+              <button
+                onClick={() => setShowAdd(true)}
+                className="mb-4 w-full rounded-xl border border-dashed border-white/20 py-3 font-medium text-gray-300 transition hover:border-brand-blue hover:bg-brand-blue/10 hover:text-white active:scale-[0.98]"
+              >
+                + Add player
+              </button>
+            )}
             <PlayerList players={game.players} currentTurn={game.currentTurn} />
           </div>
 
@@ -109,6 +120,9 @@ export default function GamePage({
           onSelect={onSelectWinner}
           onClose={onClosePicker}
         />
+      )}
+      {showAdd && onAddPlayer && (
+        <AddPlayerModal onAdd={onAddPlayer} onClose={() => setShowAdd(false)} />
       )}
     </div>
   )
